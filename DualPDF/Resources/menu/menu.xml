@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+  <item android:id="@+id/menu_open1"
+      android:title="Open in Left"
+      android:showAsAction="never" />
+  <item android:id="@+id/menu_open2"
+      android:title="Open in Right"
+      android:showAsAction="never" />
+  <item android:id="@+id/menu_license"
+      android:title="License"
+      android:showAsAction="never" />
+  <item android:id="@+id/menu_about"
+      android:title="About this app"
+      android:showAsAction="never" />
+</menu>
