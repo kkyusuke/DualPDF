@@ -11,49 +11,91 @@ using System.IO;
 
 namespace DualPDF
 {
-    [Activity(Label = "DualPDF", MainLauncher = true, Icon = "@drawable/icon")]
+    [Activity(Label = "DualPDF", MainLauncher = true, Icon = "@drawable/icon", LaunchMode = Android.Content.PM.LaunchMode.SingleTask)]
+    [IntentFilter(new[] { Intent.ActionView },
+     Categories = new[] { Intent.CategoryDefault },
+     DataMimeType = "application/pdf")]
     public class MainActivity : Activity
     {
         WebView web_view1;
         WebView web_view2;
+        LinearLayout l1;
+        LinearLayout l2;
         public static readonly int PickPDFId1 = 1750;
         public static readonly int PickPDFId2 = 1751;
 
         protected override void OnCreate(Bundle bundle)
         {
             base.OnCreate(bundle);
-
-            this.RequestedOrientation = ScreenOrientation.Landscape;
+            
 
             SetContentView(Resource.Layout.Main);
-
+            l1 = FindViewById<LinearLayout>(Resource.Id.linearLayout1);
+            l2 = FindViewById<LinearLayout>(Resource.Id.linearLayout2);
             web_view1 = FindViewById<WebView>(Resource.Id.webView1);
-            web_view1.Settings.AllowUniversalAccessFromFileURLs = true;
+            web_view2 = FindViewById<WebView>(Resource.Id.webView2);
+ 
+            if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.JellyBean) {
+                web_view1.Settings.AllowUniversalAccessFromFileURLs = true;
+            }
             web_view1.Settings.JavaScriptEnabled = true;
             web_view1.LoadUrl("file:///android_asset/pdfjs-1.4.20/web/viewer.html?file=");
             
-            //string fname = "file://" + CacheDir + "/temp1.pdf";
-            //web_view1.LoadUrl("javascript:PDFViewerApplication.open('" + fname + "')");
-
-            web_view2 = FindViewById<WebView>(Resource.Id.webView2);
-            web_view2.Settings.AllowUniversalAccessFromFileURLs = true;
+            if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.JellyBean)
+            {
+                web_view2.Settings.AllowUniversalAccessFromFileURLs = true;
+            }
             web_view2.Settings.JavaScriptEnabled = true;
             web_view2.LoadUrl("file:///android_asset/pdfjs-1.4.20/web/viewer.html?file=");
 
-            //fname = "file://" + CacheDir + "/temp2.pdf";
-            //web_view2.LoadUrl("javascript:PDFViewerApplication.open('" + fname + "')");
+            Intent i = this.Intent;
+            if (i.Data != null)
+            {
+                var dlg = new AlertDialog.Builder(this);
+                string[] items = { "Left", "Right" };
+                dlg.SetTitle("Select Display");
+                dlg.SetItems(items,
+                    (sender, args) =>
+                    {
+                        copyfile(1750 + args.Which, i);
+                        openpdf(args.Which);
+                    }
+                );
+                dlg.Create().Show();
+            }
 
+            if (System.IO.File.Exists(CacheDir + "/temp1.pdf"))
+            {
+                openpdf(0);
+            }
+            if (System.IO.File.Exists(CacheDir + "/temp2.pdf"))
+            {
+                openpdf(1);
+            }
             return;
         }
 
-        //protected override void OnResume()
-        //{
-        //    base.OnResume();
-        //    web_view1.Reload();
-        //    web_view2.Reload();
-        //    return;
-        //}
+        protected override void OnNewIntent(Intent i)
+        {
+            base.OnNewIntent(i);
 
+            if (i.Data != null)
+            {
+                var dlg = new AlertDialog.Builder(this);
+                string[] items = { "Left/Upper", "Right/Lower" };
+                dlg.SetTitle("Select Display");
+                dlg.SetItems(items,
+                    (sender, args) =>
+                    {
+                        copyfile(1750 + args.Which, i);
+                        openpdf(args.Which);
+                    }
+                );
+                dlg.Create().Show();
+            }
+            return;
+        }
+        
         public override bool OnCreateOptionsMenu(IMenu menu)
         {
             base.OnCreateOptionsMenu(menu);
@@ -64,57 +106,43 @@ namespace DualPDF
 
         protected override void OnActivityResult(int requestCode, [GeneratedEnum] Result resultCode, Intent data)
         {
-            string fname;
-            if ((requestCode == PickPDFId1 || requestCode == PickPDFId2) && (resultCode == Result.Ok) && (data != null))
+            if ((requestCode == PickPDFId1 || requestCode == PickPDFId2) && (resultCode == Result.Ok) && (data.Data != null))
             {
-                /*
-                if (data.Data.ToString().StartsWith("file"))
-                {
-                    fname = data.Data.ToString();
-                }
-                else if (data.Data.ToString().StartsWith("content"))
-                {
-                    fname = (requestCode == PickPDFId1) ? "/temp1.pdf" : "/temp2.pdf";
-                    fname = this.CacheDir + fname;
-                    Console.WriteLine(fname);
-                    Stream iS = ContentResolver.OpenInputStream(data.Data);
-                    FileStream oS = new FileStream(fname, FileMode.Create, FileAccess.Write);
-                    iS.CopyTo(oS);
-                    iS.Close(); oS.Close();
-
-                    Console.Write(fname);
-                    //fname = "file://" + fname;
-                }
-                else { return; }
-                */
-
-                fname = (requestCode == PickPDFId1) ? "/temp1.pdf" : "/temp2.pdf";
-                fname = CacheDir + fname;
-                //fname = Android.OS.Environment.ExternalStorageDirectory + fname;
-                Console.WriteLine("###DEBUG### File writing... "+fname);
-                Stream iS = ContentResolver.OpenInputStream(data.Data);
-                FileStream oS = new FileStream(fname, FileMode.Create, FileAccess.Write);
-                iS.CopyTo(oS);
-                iS.Close(); oS.Close();
-
-                Console.Write(fname);
-                fname = "file://" + fname;
+                copyfile(requestCode,data);
             }
             else { return; }
 
-            if (requestCode == PickPDFId1){ openpdf(web_view1, fname); }
-            else{ openpdf(web_view2, fname); }
-
+            if (requestCode == PickPDFId1){ openpdf(0); }
+            else{ openpdf(1); }
             return;
         }
 
-        public void openpdf(WebView w, string fname)
+        protected void copyfile(int requestCode, Intent data)
         {
-            if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.Kitkat)
-            {
+            string fname = (requestCode == PickPDFId1) ? "/temp1.pdf" : "/temp2.pdf";
+            fname = CacheDir + fname;
+            Console.WriteLine("###DEBUG### File writing... " + fname);
+            Console.WriteLine("###DEBUG### Intent: " + data.Data);
+            Stream iS = ContentResolver.OpenInputStream(data.Data);
+            FileStream oS = new FileStream(fname, FileMode.Create, FileAccess.Write);
+            iS.CopyTo(oS);
+            iS.Close(); oS.Close();
+        }
+
+        public void openpdf(int num)
+        {
+            string fname;
+            WebView w = (num == 0) ? web_view1 : web_view2;
+            fname = "file://" + CacheDir;
+            fname += (num == 0) ? "/temp1.pdf" : "/temp2.pdf";
+
+
+            if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.Kitkat || Android.OS.Build.VERSION.SdkInt<Android.OS.BuildVersionCodes.Honeycomb)
+            {       
                 string url = String.Format("file:///android_asset/pdfjs-1.4.20/web/viewer.html?file={0}", fname);
                 w.LoadUrl(url);
-            }else
+            }
+            else
             {
                 w.LoadUrl("javascript:PDFViewerApplication.open('" + fname + "')");
                 w.ClearCache(false);
@@ -131,6 +159,31 @@ namespace DualPDF
             if (item.ItemId == Resource.Id.menu_open2)
             {
                 startIntent(1);
+            }
+
+            if (item.ItemId == Resource.Id.menu_left)
+            {
+                if (((LinearLayout.LayoutParams)l2.LayoutParameters).Weight > 0.1)
+                {
+                    LinearLayout.LayoutParams params1 = (LinearLayout.LayoutParams)l1.LayoutParameters;
+                    params1.Weight += 0.1f;
+                    LinearLayout.LayoutParams params2 = (LinearLayout.LayoutParams)l2.LayoutParameters;
+                    params2.Weight -= 0.1f;
+                    l1.LayoutParameters = params1;
+                    l2.LayoutParameters = params2;
+                }
+            }
+            if (item.ItemId == Resource.Id.menu_right)
+            {
+                if (((LinearLayout.LayoutParams)l1.LayoutParameters).Weight > 0.1)
+                {
+                    LinearLayout.LayoutParams params1 = (LinearLayout.LayoutParams)l1.LayoutParameters;
+                    params1.Weight -= 0.1f;
+                    LinearLayout.LayoutParams params2 = (LinearLayout.LayoutParams)l2.LayoutParameters;
+                    params2.Weight += 0.1f;
+                    l1.LayoutParameters = params1;
+                    l2.LayoutParameters = params2;
+                }
             }
 
             if (item.ItemId == Resource.Id.menu_license)
@@ -176,7 +229,6 @@ namespace DualPDF
         {
             if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.Kitkat)
             {
-                //Intent intent = new Intent(Intent.ActionOpenDocument);
                 Intent intent = new Intent(Intent.ActionGetContent);
                 intent.SetType("application/pdf");
                 try
@@ -193,8 +245,6 @@ namespace DualPDF
             {
                 Intent intent = new Intent(Intent.ActionGetContent);
                 intent.SetType("application/pdf");
-                //intent.SetType("*/*");
-                //intent.SetAction(Intent.ActionPick);
                 try
                 {
                     StartActivityForResult(intent, 1750 + button_num);

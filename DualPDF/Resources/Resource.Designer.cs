@@ -66,17 +66,23 @@ namespace DualPDF
 			// aapt resource value: 0x7f060002
 			public const int linearLayout2 = 2131099650;
 			
-			// aapt resource value: 0x7f060007
-			public const int menu_about = 2131099655;
+			// aapt resource value: 0x7f060009
+			public const int menu_about = 2131099657;
 			
 			// aapt resource value: 0x7f060006
-			public const int menu_license = 2131099654;
+			public const int menu_left = 2131099654;
+			
+			// aapt resource value: 0x7f060008
+			public const int menu_license = 2131099656;
 			
 			// aapt resource value: 0x7f060004
 			public const int menu_open1 = 2131099652;
 			
 			// aapt resource value: 0x7f060005
 			public const int menu_open2 = 2131099653;
+			
+			// aapt resource value: 0x7f060007
+			public const int menu_right = 2131099655;
 			
 			// aapt resource value: 0x7f060001
 			public const int webView1 = 2131099649;
