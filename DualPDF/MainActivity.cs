@@ -23,8 +23,7 @@ namespace DualPDF
         LinearLayout l2;
         public static readonly int PickPDFId1 = 1750;
         public static readonly int PickPDFId2 = 1751;
-        //String baseaddr = "file:///android_asset/pdfjs-1.4.20/web/viewer.html?file=";
-        String baseaddr = "file:///android_asset/pdfjs-1.5.188/web/viewer.html?file=";
+        String baseaddr = "file:///android_asset/pdfjs-1.4.20/web/viewer.html?file=";
 
 
         protected override void OnCreate(Bundle bundle)
