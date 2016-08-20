@@ -1,4 +1,4 @@
-﻿using System;//
+﻿using System;
 using Android.App;
 using Android.Content;
 using Android.Runtime;
@@ -23,7 +23,9 @@ namespace DualPDF
         LinearLayout l2;
         public static readonly int PickPDFId1 = 1750;
         public static readonly int PickPDFId2 = 1751;
-        int page1=1, page2=1;
+        //String baseaddr = "file:///android_asset/pdfjs-1.4.20/web/viewer.html?file=";
+        String baseaddr = "file:///android_asset/pdfjs-1.5.188/web/viewer.html?file=";
+
 
         protected override void OnCreate(Bundle bundle)
         {
@@ -40,16 +42,14 @@ namespace DualPDF
                 web_view1.Settings.AllowUniversalAccessFromFileURLs = true;
             }
             web_view1.Settings.JavaScriptEnabled = true;
-            
-
-            web_view1.LoadUrl("file:///android_asset/pdfjs-1.4.20/web/viewer.html?file=");
+            web_view1.LoadUrl(baseaddr);
             
             if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.JellyBean)
             {
                 web_view2.Settings.AllowUniversalAccessFromFileURLs = true;
             }
             web_view2.Settings.JavaScriptEnabled = true;
-            web_view2.LoadUrl("file:///android_asset/pdfjs-1.4.20/web/viewer.html?file=");
+            web_view2.LoadUrl(baseaddr);
 
             Intent i = this.Intent;
             if (i.Data != null)
@@ -137,14 +137,13 @@ namespace DualPDF
         {
             string fname;
             WebView w = (num == 0) ? web_view1 : web_view2;
-            if (num == 0) { page1 = 1; } else { page2 = 1; }
             fname = "file://" + CacheDir;
             fname += (num == 0) ? "/temp1.pdf" : "/temp2.pdf";
 
 
             if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.Kitkat || Android.OS.Build.VERSION.SdkInt<Android.OS.BuildVersionCodes.Honeycomb)
-            {       
-                string url = String.Format("file:///android_asset/pdfjs-1.4.20/web/viewer.html?file={0}", fname);
+            {
+                string url = baseaddr + fname;
                 w.ClearCache(false);
                 w.LoadUrl(url);
             }
@@ -263,8 +262,6 @@ namespace DualPDF
             }
             return;
         }
-
-        
 
     }
 }
