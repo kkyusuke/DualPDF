@@ -23,6 +23,7 @@ namespace DualPDF
         LinearLayout l2;
         public static readonly int PickPDFId1 = 1750;
         public static readonly int PickPDFId2 = 1751;
+        int page1=1, page2=1;
 
         protected override void OnCreate(Bundle bundle)
         {
@@ -39,6 +40,8 @@ namespace DualPDF
                 web_view1.Settings.AllowUniversalAccessFromFileURLs = true;
             }
             web_view1.Settings.JavaScriptEnabled = true;
+            
+
             web_view1.LoadUrl("file:///android_asset/pdfjs-1.4.20/web/viewer.html?file=");
             
             if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.JellyBean)
@@ -74,6 +77,7 @@ namespace DualPDF
             }
             return;
         }
+
 
         protected override void OnNewIntent(Intent i)
         {
@@ -133,6 +137,7 @@ namespace DualPDF
         {
             string fname;
             WebView w = (num == 0) ? web_view1 : web_view2;
+            if (num == 0) { page1 = 1; } else { page2 = 1; }
             fname = "file://" + CacheDir;
             fname += (num == 0) ? "/temp1.pdf" : "/temp2.pdf";
 
@@ -140,6 +145,7 @@ namespace DualPDF
             if (Android.OS.Build.VERSION.SdkInt >= Android.OS.BuildVersionCodes.Kitkat || Android.OS.Build.VERSION.SdkInt<Android.OS.BuildVersionCodes.Honeycomb)
             {       
                 string url = String.Format("file:///android_asset/pdfjs-1.4.20/web/viewer.html?file={0}", fname);
+                w.ClearCache(false);
                 w.LoadUrl(url);
             }
             else
