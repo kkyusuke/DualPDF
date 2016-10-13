@@ -23,7 +23,7 @@ namespace DualPDF
         LinearLayout l2;
         public static readonly int PickPDFId1 = 1750;
         public static readonly int PickPDFId2 = 1751;
-        String baseaddr = "file:///android_asset/pdfjs-1.4.20/web/viewer.html?file=";
+        String baseaddr = "file:///android_asset/pdfjs-1.5.188-dist/web/viewer.html?file=";
 
 
         protected override void OnCreate(Bundle bundle)
@@ -126,10 +126,19 @@ namespace DualPDF
             fname = CacheDir + fname;
             Console.WriteLine("###DEBUG### File writing... " + fname);
             Console.WriteLine("###DEBUG### Intent: " + data.Data);
-            Stream iS = ContentResolver.OpenInputStream(data.Data);
-            FileStream oS = new FileStream(fname, FileMode.Create, FileAccess.Write);
-            iS.CopyTo(oS);
-            iS.Close(); oS.Close();
+            
+            try
+            {
+                Stream iS = ContentResolver.OpenInputStream(data.Data);
+                FileStream oS = new FileStream(fname, FileMode.Create, FileAccess.Write);
+                iS.CopyTo(oS);
+                iS.Close(); oS.Close();
+            }
+            catch (Exception e)
+            {
+                Toast.MakeText(this, "File Copy Error", ToastLength.Long).Show();
+                return;
+            }           
         }
 
         public void openpdf(int num)

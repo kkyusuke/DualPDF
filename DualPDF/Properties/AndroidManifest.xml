@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="jp.kkyusuke.DualPDF" android:versionName="1.7.2" android:installLocation="auto" android:versionCode="8">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="jp.kkyusuke.DualPDF" android:versionName="1.9" android:installLocation="auto" android:versionCode="9">
 	<uses-sdk android:minSdkVersion="7" android:targetSdkVersion="19" />
 	<application android:label="DualPDF" android:icon="@drawable/icon"></application>
 </manifest>
